@@ -1,3 +1,7 @@
 [submodule "themes/sport"]
 	path = themes/sport
 	url = https://github.com/dshimy/hugo-theme-sport
+[submodule "public"]
+	path = public
+	url = git@github.com:dshimy/dshimy.github.io.git
+	branch = master
