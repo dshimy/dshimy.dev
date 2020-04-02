@@ -1,0 +1,3 @@
+[submodule "themes/sport"]
+	path = themes/sport
+	url = https://github.com/dshimy/hugo-theme-sport
