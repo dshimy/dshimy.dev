@@ -19,5 +19,5 @@ jobs:
         env:
           HUGO_VERSION: 0.68.3
           TARGET_REPO: dshimy/dshimy.github.io
-          TOKEN: ${{ secrets.TOKEN }}
+          TOKEN: ${{ secrets.GITHUB_PERSONAL_TOKEN }}
           CNAME: dshimy.dev
