@@ -3,6 +3,9 @@ languageCode = "en-us"
 title = "dshimy.dev"
 theme = "sport"
 
+[taxonomies]
+  tag = "tags"
+
 [markup.highlight]
   codeFences = true
   guessSyntax = false
