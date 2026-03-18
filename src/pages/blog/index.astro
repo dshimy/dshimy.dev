@@ -22,6 +22,43 @@ const posts = (await getCollection('blog')).sort(
 				margin: auto;
 				padding: 1em;
 			}
+			.search-container {
+				margin-bottom: 1.5rem;
+			}
+			#search-input {
+				width: 100%;
+				padding: 0.75rem 1rem;
+				font-family: inherit;
+				font-size: 1rem;
+				border: 1px solid rgba(var(--gray-light), 1);
+				border-radius: 0.5rem;
+				background: white;
+				color: rgb(var(--black));
+				outline: none;
+				transition: border-color 0.2s ease;
+			}
+			#search-input:focus {
+				border-color: rgb(var(--accent));
+				box-shadow: 0 0 0 2px rgba(var(--accent), 0.15);
+			}
+			#search-input::placeholder {
+				color: rgb(var(--gray));
+			}
+			.sr-only {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				padding: 0;
+				margin: -1px;
+				overflow: hidden;
+				clip: rect(0, 0, 0, 0);
+				border: 0;
+			}
+			.no-results {
+				color: rgb(var(--gray));
+				font-style: italic;
+				margin-top: 1rem;
+			}
 			ul {
 				display: flex;
 				flex-direction: column;
@@ -70,10 +107,15 @@ const posts = (await getCollection('blog')).sort(
 		<Header />
 		<main>
 			<section>
+				<div class="search-container">
+					<label for="search-input" class="sr-only">Search blog posts</label>
+					<input type="search" id="search-input" placeholder="Search posts..." autocomplete="off" />
+					<p id="no-results" style="display:none;" class="no-results">No posts found.</p>
+				</div>
 				<ul>
 					{
 						posts.map((post) => (
-							<li>
+							<li data-title={post.data.title.toLowerCase()} data-description={(post.data.description || '').toLowerCase()}>
 								<a href={`/blog/${post.id}/`}>
 									<span class="title">{post.data.title}</span>
 									<span class="date">
@@ -86,6 +128,26 @@ const posts = (await getCollection('blog')).sort(
 				</ul>
 			</section>
 		</main>
+		<script>
+			const input = document.getElementById('search-input');
+			const items = document.querySelectorAll('ul li[data-title]');
+			const noResults = document.getElementById('no-results');
+
+			input.addEventListener('input', () => {
+				const query = input.value.toLowerCase().trim();
+				let visible = 0;
+
+				items.forEach((li) => {
+					const title = li.getAttribute('data-title') || '';
+					const desc = li.getAttribute('data-description') || '';
+					const match = !query || title.includes(query) || desc.includes(query);
+					li.style.display = match ? '' : 'none';
+					if (match) visible++;
+				});
+
+				noResults.style.display = visible === 0 ? '' : 'none';
+			});
+		</script>
 		<Footer />
 	</body>
 </html>
