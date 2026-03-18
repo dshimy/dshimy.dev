@@ -1,48 +1,121 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+
+const posts = (await getCollection('blog'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 5);
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.hero {
+				margin-bottom: 2rem;
+			}
+			.hero h1 {
+				font-size: 2.5rem;
+				margin-bottom: 0.5rem;
+			}
+			.hero .tagline {
+				font-size: 1.25rem;
+				color: rgb(var(--gray));
+				margin-bottom: 1.5rem;
+			}
+			.hero .bio {
+				margin-bottom: 1rem;
+			}
+			.hero .bio a {
+				text-decoration: none;
+			}
+			.hero .bio a:hover {
+				text-decoration: underline;
+			}
+			section h2 {
+				margin-bottom: 1rem;
+			}
+			.post-list {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+			}
+			.post-list li {
+				margin-bottom: 1.5rem;
+				padding-bottom: 1.5rem;
+				border-bottom: 1px solid rgb(var(--gray-light));
+			}
+			.post-list li:last-child {
+				border-bottom: none;
+			}
+			.post-list a {
+				text-decoration: none;
+				display: block;
+			}
+			.post-list a:hover .post-title {
+				color: var(--accent);
+			}
+			.post-title {
+				font-size: 1.25rem;
+				font-weight: 700;
+				color: rgb(var(--black));
+				margin: 0 0 0.25rem 0;
+				line-height: 1.3;
+				transition: color 0.2s ease;
+			}
+			.post-date {
+				font-size: 0.875rem;
+				color: rgb(var(--gray));
+				margin: 0 0 0.5rem 0;
+			}
+			.post-description {
+				color: rgb(var(--gray-dark));
+				margin: 0;
+				font-size: 0.95rem;
+			}
+			.view-all {
+				margin-top: 1rem;
+				font-weight: 700;
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<div class="hero">
+				<h1>Hi, I'm Darian Shimy</h1>
+				<p class="tagline">Founder & CEO of <a href="https://futurefund.com">FutureFund</a></p>
+				<p class="bio">
+					I build technology that helps K-12 schools raise money and engage their communities.
+					I write about leadership, entrepreneurship, coaching, and the craft of building products.
+				</p>
+				<p class="bio">
+					<a href="/about">More about me &rarr;</a>
+				</p>
+			</div>
+
+			<section>
+				<h2>Recent Posts</h2>
+				<ul class="post-list">
+					{posts.map((post) => (
+						<li>
+							<a href={`/blog/${post.id}/`}>
+								<p class="post-title">{post.data.title}</p>
+								<p class="post-date"><FormattedDate date={post.data.pubDate} /></p>
+								<p class="post-description">{post.data.description}</p>
+							</a>
+						</li>
+					))}
+				</ul>
+				<p class="view-all">
+					<a href="/blog">View all posts &rarr;</a>
+				</p>
+			</section>
 		</main>
 		<Footer />
 	</body>
