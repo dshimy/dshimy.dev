@@ -101,6 +101,38 @@ const posts = (await getCollection('blog')).sort(
 					gap: 0.25rem;
 				}
 			}
+			.pagination {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				gap: 0.5rem;
+				margin-top: 2rem;
+				padding: 1rem 0;
+			}
+			.pagination button {
+				padding: 0.5rem 1rem;
+				font-family: inherit;
+				font-size: 0.875rem;
+				border: 1px solid rgba(var(--gray-light), 1);
+				border-radius: 0.375rem;
+				background: white;
+				color: rgb(var(--black));
+				cursor: pointer;
+				transition: 0.2s ease;
+			}
+			.pagination button:hover:not(:disabled) {
+				border-color: rgb(var(--accent));
+				color: rgb(var(--accent));
+			}
+			.pagination button:disabled {
+				opacity: 0.4;
+				cursor: default;
+			}
+			.pagination .page-info {
+				font-size: 0.875rem;
+				color: rgb(var(--gray));
+				margin: 0 0.5rem;
+			}
 		</style>
 	</head>
 	<body>
@@ -126,27 +158,81 @@ const posts = (await getCollection('blog')).sort(
 						))
 					}
 				</ul>
+				<nav id="pagination" class="pagination">
+					<button id="prev-btn" type="button">&larr; Prev</button>
+					<span id="page-info" class="page-info"></span>
+					<button id="next-btn" type="button">Next &rarr;</button>
+				</nav>
 			</section>
 		</main>
 		<script>
-			const input = document.getElementById('search-input');
-			const items = document.querySelectorAll('ul li[data-title]');
-			const noResults = document.getElementById('no-results');
+			const PAGE_SIZE = 20;
+			const input = document.getElementById('search-input') as HTMLInputElement;
+			const items = Array.from(document.querySelectorAll('ul li[data-title]')) as HTMLElement[];
+			const noResults = document.getElementById('no-results')!;
+			const pagination = document.getElementById('pagination')!;
+			const prevBtn = document.getElementById('prev-btn') as HTMLButtonElement;
+			const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
+			const pageInfo = document.getElementById('page-info')!;
 
-			input.addEventListener('input', () => {
+			let currentPage = 1;
+			let isSearching = false;
+
+			function getFilteredItems(): HTMLElement[] {
 				const query = input.value.toLowerCase().trim();
-				let visible = 0;
-
-				items.forEach((li) => {
+				if (!query) return items;
+				return items.filter((li) => {
 					const title = li.getAttribute('data-title') || '';
 					const desc = li.getAttribute('data-description') || '';
-					const match = !query || title.includes(query) || desc.includes(query);
-					li.style.display = match ? '' : 'none';
-					if (match) visible++;
+					return title.includes(query) || desc.includes(query);
 				});
+			}
 
-				noResults.style.display = visible === 0 ? '' : 'none';
+			function render() {
+				const query = input.value.toLowerCase().trim();
+				isSearching = query.length > 0;
+				const filtered = getFilteredItems();
+				const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+
+				if (currentPage > totalPages) currentPage = totalPages || 1;
+
+				// Hide all items first
+				items.forEach((li) => (li.style.display = 'none'));
+
+				if (isSearching) {
+					// Show all matching items when searching (no pagination)
+					filtered.forEach((li) => (li.style.display = ''));
+					pagination.style.display = 'none';
+				} else {
+					// Paginate
+					const start = (currentPage - 1) * PAGE_SIZE;
+					const end = start + PAGE_SIZE;
+					filtered.slice(start, end).forEach((li) => (li.style.display = ''));
+
+					pagination.style.display = totalPages > 1 ? 'flex' : 'none';
+					prevBtn.disabled = currentPage <= 1;
+					nextBtn.disabled = currentPage >= totalPages;
+					pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+				}
+
+				noResults.style.display = filtered.length === 0 ? '' : 'none';
+			}
+
+			input.addEventListener('input', () => {
+				currentPage = 1;
+				render();
 			});
+
+			prevBtn.addEventListener('click', () => {
+				if (currentPage > 1) { currentPage--; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+			});
+
+			nextBtn.addEventListener('click', () => {
+				const totalPages = Math.ceil(getFilteredItems().length / PAGE_SIZE);
+				if (currentPage < totalPages) { currentPage++; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+			});
+
+			render();
 		</script>
 		<Footer />
 	</body>
